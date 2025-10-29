@@ -9,7 +9,7 @@ namespace Mingo.ObjectStorageService.EntityFrameworkCore;
 public class AppDbContext : DbContext
 {
     private readonly IEntityConfiguration _entityConfiguration;
-    public AppDbContext(DbContextOptions<AppDbContext> options, IEntityConfiguration entityConfiguration) : base(options)
+    public AppDbContext(DbContextOptions<AppDbContext> options, IEntityConfiguration<AppDbContext> entityConfiguration) : base(options)
     {
         _entityConfiguration = entityConfiguration;
     }

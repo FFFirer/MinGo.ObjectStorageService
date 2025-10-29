@@ -14,9 +14,11 @@ public class SqliteEntityConfiguration<TDbContext> : DbContextEntityConfiguratio
         objectEntity.HasKey(x => new { x.BucketName, x.Id });
         objectEntity.Property(x => x.CreatedTime).HasConversion(SqliteDateTimeOffsetValueConvertor.Instance);
         objectEntity.Property(x => x.LastModified).HasConversion(SqliteDateTimeOffsetValueConvertor.Instance);
+        objectEntity.Property(x => x.Metadata).HasConversion(JsonValueConvertor<Dictionary<string, string>>.Create(new()));
 
         var bucketEntity = modelBuilder.Entity<BucketEntity>();
         bucketEntity.HasKey(x => x.Id);
         bucketEntity.Property(x => x.CreatedTime).HasConversion(SqliteDateTimeOffsetValueConvertor.Instance);
+        bucketEntity.Property(x => x.Metadata).HasConversion(JsonValueConvertor<Dictionary<string, string>>.Create(new()));
     }
 }

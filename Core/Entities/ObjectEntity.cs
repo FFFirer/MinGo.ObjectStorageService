@@ -4,11 +4,11 @@ namespace Mingo.ObjectStorageService.Core.Entities;
 
 public class ObjectEntity
 {
-    public ObjectEntity(string id, string bucket, string fileName)
+    public ObjectEntity(string id, string bucketName, string fileName)
     {
         Id = id;
         Guid = Guid.NewGuid();
-        BucketName = bucket;
+        BucketName = bucketName;
         FileName = fileName;
         CreatedTime = DateTimeOffset.UtcNow;
     }
