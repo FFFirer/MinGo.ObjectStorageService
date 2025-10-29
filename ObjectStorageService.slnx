@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="AspNetCore/AspNetCore.csproj" />
+  <Project Path="Core/Core.csproj" />
+  <Project Path="EntityFrameworkCore.Sqlite/EntityFrameworkCore.Sqlite.csproj" />
+  <Project Path="EntityFrameworkCore/EntityFrameworkCore.csproj" />
+  <Project Path="Mingo.ObjectStorageService/Mingo.ObjectStorageService.csproj" />
+</Solution>
