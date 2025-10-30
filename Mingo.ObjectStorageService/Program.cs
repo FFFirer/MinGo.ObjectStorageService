@@ -22,7 +22,8 @@ builder.Logging
 builder.Services
 .AddHttpContextAccessor()
 .AddEndpointsApiExplorer()
-.AddRazorPages();
+.AddHealthChecks();
+// .AddRazorPages();
 
 builder.Services
 .AddOpenApiDocument();

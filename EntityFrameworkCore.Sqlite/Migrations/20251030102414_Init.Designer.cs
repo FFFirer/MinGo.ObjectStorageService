@@ -11,8 +11,8 @@ using Mingo.ObjectStorageService.EntityFrameworkCore;
 namespace Mingo.ObjectStorageService.EntityFrameworkCore.Sqlite.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251029225942_init")]
-    partial class init
+    [Migration("20251030102414_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
