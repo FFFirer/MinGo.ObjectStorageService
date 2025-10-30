@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
 
 using Mingo.ObjectStorageService;
@@ -5,6 +6,7 @@ using Mingo.ObjectStorageService.AspNetCore.Endpoints;
 using Mingo.ObjectStorageService.Core;
 using Mingo.ObjectStorageService.EntityFrameworkCore;
 using Mingo.ObjectStorageService.EntityFrameworkCore.Sqlite;
+using Mingo.ObjectStorageService.NSwag;
 
 using Serilog;
 
@@ -23,10 +25,14 @@ builder.Services
 .AddHttpContextAccessor()
 .AddEndpointsApiExplorer()
 .AddHealthChecks();
-// .AddRazorPages();
 
 builder.Services
-.AddOpenApiDocument();
+.AddOpenApiDocument(doc =>
+{
+    doc.Title = "ObjectStorage Service APIs";
+
+    doc.OperationProcessors.Insert(1, new OperationCatchRemainPathParameterProcessor());
+});
 
 builder.Services
 .AddObjectStorageCore()
@@ -43,8 +49,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUi();
 }
 
-app.MapGroup("oss")
-.MapObjectEndpoints()
-.MapBucketEndpoints();
+app.MapGroup("oss").MapObjectServiceEndpoints();
 
 app.Run();
