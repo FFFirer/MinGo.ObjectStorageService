@@ -4,5 +4,5 @@ namespace Mingo.ObjectStorageService.Core.Stores;
 
 public interface IStoreBase
 {
-    Task SaveChangesAsync(CancellationToken cancellationToken);
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

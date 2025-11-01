@@ -1,10 +1,14 @@
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi;
 
+using Mingo.ObjectStorageService.Core;
+using Mingo.ObjectStorageService.Core.Entities;
 using Mingo.ObjectStorageService.Core.Services;
 
 namespace Mingo.ObjectStorageService.AspNetCore.Endpoints;
@@ -14,34 +18,59 @@ public static class ObjectServiceEndpointExtensions
     public static IEndpointRouteBuilder MapObjectServiceEndpoints(this IEndpointRouteBuilder endpoints)
     {
         endpoints.MapPost("{bucket}", CreateBucket);
+        endpoints.MapDelete("{bucket}", DeleteBucket);
 
-        endpoints.MapPut("{bucket}/{*id}", UploadObject);
+        endpoints.MapPut("{bucket}/{*id}", UploadObject)
+            .Accepts<Stream>("application/octet-stream")
+            .DisableRequestSizeLimit()
+            .DisableAntiforgery();
+
+        endpoints.MapPost("{bucket}/{*id}", UploadObjectForm)
+            .Accepts<IFormFile>("multipart/form-data")
+            .DisableRequestSizeLimit()
+            .DisableAntiforgery();
+
         endpoints.MapGet("{bucket}/{*id}", DownloadObject);
         endpoints.MapDelete("{bucket}/{*id}", DeleteObject);
-        endpoints.MapDelete("{bucket}", DeleteBucket);
 
         return endpoints;
     }
 
-    public static async Task<Ok> DeleteBucketOrObject([FromRoute] string bucket, [FromRoute] string id, [FromServices] IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    public static async Task<Ok> DeleteBucketOrObject([FromRoute] string bucket, [FromRoute] string id, [FromServices] IObjectStorageService service, CancellationToken cancellationToken)
     {
         return id switch
         {
-            null => await DeleteBucket(bucket, serviceProvider.GetRequiredService<IBucketService>(), cancellationToken),
-            _ => await DeleteObject(bucket, id, serviceProvider.GetRequiredService<IObjectService>(), cancellationToken)
+            null => await DeleteBucket(bucket, service, cancellationToken),
+            _ => await DeleteObject(bucket, id, service, cancellationToken)
         };
     }
 
-    public static async Task<Ok> UploadObject([FromRoute] string bucket, [FromRoute] string id, [FromBody] IFormFile file, [FromServices] IObjectService objectService, CancellationToken cancellationToken)
+    public static async Task<Ok> UploadObjectForm([FromRoute] string bucket, [FromRoute] string id, IFormFile file, HttpRequest request, [FromServices] IObjectStorageService service, CancellationToken cancellationToken)
     {
-        using var stream = file.OpenReadStream();
-        await objectService.SaveAsync(stream, new(bucket, id, file.FileName, file.ContentType, file.Length), cancellationToken);
+        var metadata = request.Headers.ResolveUploadObjectMetadata();
+
+        var uploadInfo = new UploadObjectInfo(bucket, id, file.FileName, file.ContentType, file.Length, metadata);
+        using var writeStream = await service.OpenObjectSaveStreamAsync(uploadInfo, cancellationToken);
+        await file.CopyToAsync(writeStream, cancellationToken);
+
         return TypedResults.Ok();
     }
 
-    public static async Task<Results<IResult, NotFound, InternalServerError>> DownloadObject([FromRoute] string bucket, [FromRoute] string id, [FromServices] IObjectService objectService, CancellationToken cancellationToken)
+    public static async Task<Ok> UploadObject([FromRoute] string bucket, [FromRoute] string id, Stream file, HttpRequest request, [FromServices] IObjectStorageService service, CancellationToken cancellationToken)
     {
-        var resp = await objectService.GetDownloadAsync(new(bucket, id), cancellationToken);
+        // using var stream = file.OpenReadStream();
+        var metadata = request.Headers.ResolveUploadObjectMetadata();
+        var filename = metadata.GetValueOrDefault(ObjectMetadataKeys.FileName, string.Empty);
+        var contentType = metadata.GetValueOrDefault(ObjectMetadataKeys.ContentType, string.Empty);
+
+        UploadObjectInfo uploadInfo = new(bucket, id, filename, contentType, 0, metadata);
+        await service.SaveObjectAsync(file, uploadInfo, cancellationToken);
+        return TypedResults.Ok();
+    }
+
+    public static async Task<Results<IResult, NotFound, InternalServerError>> DownloadObject([FromRoute] string bucket, [FromRoute] string id, [FromServices] IObjectStorageService service, CancellationToken cancellationToken)
+    {
+        var resp = await service.GetObjectDownloadAsync(new(bucket, id), cancellationToken);
 
         return resp switch
         {
@@ -56,22 +85,22 @@ public static class ObjectServiceEndpointExtensions
         };
     }
 
-    public static async Task<Ok> DeleteObject([FromRoute] string bucket, [FromRoute] string id, [FromServices] IObjectService objectService, CancellationToken cancellationToken)
+    public static async Task<Ok> DeleteObject([FromRoute] string bucket, [FromRoute] string id, [FromServices] IObjectStorageService service, CancellationToken cancellationToken)
     {
-        await objectService.DeleteAsync(new(bucket, id), cancellationToken);
+        await service.DeleteObjectAsync(new(bucket, id), cancellationToken);
         return TypedResults.Ok();
     }
 
 
-    public static async Task<Ok> CreateBucket([FromRoute] string bucket, [FromServices] IBucketService bucketService, CancellationToken cancellationToken)
+    public static async Task<Ok> CreateBucket([FromRoute] string bucket, [FromServices] IObjectStorageService service, CancellationToken cancellationToken)
     {
-        await bucketService.CreateAsync(bucket, cancellationToken);
+        await service.CreateBucketAsync(bucket, cancellationToken);
         return TypedResults.Ok();
     }
 
-    public static async Task<Ok> DeleteBucket([FromRoute] string bucket, [FromServices] IBucketService bucketService, CancellationToken cancellationToken)
+    public static async Task<Ok> DeleteBucket([FromRoute] string bucket, [FromServices] IObjectStorageService service, CancellationToken cancellationToken)
     {
-        await bucketService.DeleteAsync(bucket, cancellationToken);
+        await service.DeleteBucketAsync(bucket, cancellationToken);
         return TypedResults.Ok();
     }
 }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 
 using Mingo.ObjectStorageService;
@@ -11,6 +12,10 @@ using Mingo.ObjectStorageService.NSwag;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = null;
+});
 
 Log.Logger = new LoggerConfiguration()
 .ReadFrom.Configuration(builder.Configuration)
@@ -23,6 +28,7 @@ builder.Logging
 
 builder.Services
 .AddHttpContextAccessor()
+.AddProblemDetails()
 .AddEndpointsApiExplorer()
 .AddHealthChecks();
 
@@ -33,6 +39,7 @@ builder.Services
 
     doc.OperationProcessors.Insert(1, new OperationCatchRemainPathParameterProcessor());
 });
+
 
 builder.Services
 .AddObjectStorageCore()
@@ -49,6 +56,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUi();
 }
 
+app.UseMiddleware<RequestSizeLimitMiddleware>();
 app.MapGroup("oss").MapObjectServiceEndpoints();
 
 app.Run();

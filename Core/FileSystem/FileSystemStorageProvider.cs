@@ -45,7 +45,7 @@ public class FileSystemStorageProvider : IStorageProvider
             if (string.IsNullOrWhiteSpace(_fullBase))
             {
                 ArgumentNullException.ThrowIfNullOrWhiteSpace(_options.BaseDirectory, $"{FileSystemStorageProviderOptions.Base}:{nameof(FileSystemStorageProviderOptions.BaseDirectory)}");
-                _fullBase = Path.GetFullPath(_options.BaseDirectory);
+                _fullBase = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, _options.BaseDirectory));
             }
             return _fullBase;
         }
@@ -82,7 +82,7 @@ public class FileSystemStorageProvider : IStorageProvider
     private string ResolveBucketPhysicalPath(string bucketName)
     {
         var fullpath = Path.GetFullPath(Path.Combine(FullBasePath, bucketName));
-        ThrowIfInvalidPath(bucketName);
+        ThrowIfInvalidPath(fullpath);
 
         return fullpath;
     }
@@ -126,8 +126,25 @@ public class FileSystemStorageProvider : IStorageProvider
         return Task.FromResult(info);
     }
 
-    public Task SaveAsync(Stream stream, ObjectInfo objectInfo, CancellationToken cancellationToken)
+    public async Task SaveAsync(Stream stream, ObjectInfo objectInfo, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        using var fs = OpenWriteStream(objectInfo);
+        await stream.CopyToAsync(fs);
+    }
+
+    private Stream OpenWriteStream(ObjectInfo objectInfo)
+    {
+        var path = ResolveObjectPhysicalPath(objectInfo.Bucket, objectInfo.Id);
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
+
+        return new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Write);
+    }
+
+    public Stream OpenWriteStream(ObjectInfo objectInfo, CancellationToken cancellationToken)
+    {
+        return OpenWriteStream(objectInfo);
     }
 }

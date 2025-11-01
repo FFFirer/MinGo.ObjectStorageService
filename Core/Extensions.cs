@@ -26,7 +26,21 @@ public static class Extensions
     public static IServiceCollection AddObjectStorageCore(this IServiceCollection services)
     {
         return services
-            .AddScoped<IObjectService, ObjectService>()
-            .AddScoped<IBucketService, BucketService>();
+            .AddScoped<IObjectStorageService, DefaultObjectStorageService>();
+    }
+}
+
+public static class CollectionExtensions
+{
+    public static bool IsNullOrEmpty<T>(this IEnumerable<T>? collection)
+    {
+        return collection is null || collection.Any() == false;
+    }
+
+    public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue)
+    {
+        ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));
+
+        return dictionary.TryGetValue(key, out var value) ? value : defaultValue;
     }
 }

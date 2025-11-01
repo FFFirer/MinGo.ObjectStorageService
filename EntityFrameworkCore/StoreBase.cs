@@ -1,23 +1,19 @@
 using System;
 
+using Microsoft.EntityFrameworkCore;
+
 using Mingo.ObjectStorageService.Core.Stores;
 
 namespace Mingo.ObjectStorageService.EntityFrameworkCore;
 
-public class StoreBase : IStoreBase, IDisposable
+public abstract class StoreBase : IStoreBase, IDisposable
 {
-    protected virtual AppDbContext AppDB { get; init; }
     private bool _disposed;
+    protected virtual AppDbContext Db { get; }
 
     public StoreBase(AppDbContext db)
     {
-        AppDB = db;
-    }
-
-    public async Task SaveChangesAsync(CancellationToken cancellationToken)
-    {
-        ThrowIfDisposed();
-        await AppDB.SaveChangesAsync(cancellationToken);
+        Db = db;
     }
 
     protected virtual void ThrowIfDisposed()
@@ -27,34 +23,11 @@ public class StoreBase : IStoreBase, IDisposable
             throw new ObjectDisposedException(this.GetType().FullName);
         }
     }
-    protected virtual void Dispose(bool disposing)
+
+    public void Dispose() => _disposed = true;
+
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
-        if (!_disposed)
-        {
-            if (disposing)
-            {
-                // TODO: dispose managed state (managed objects)
-                AppDB.SaveChanges();
-                AppDB.Dispose();
-            }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
-            _disposed = true;
-        }
-    }
-
-    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    // ~StoreBase()
-    // {
-    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-    //     Dispose(disposing: false);
-    // }
-
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
+        return await Db.SaveChangesAsync(cancellationToken);
     }
 }

@@ -27,5 +27,6 @@ public class ObjectEntity
 public static class ObjectMetadataKeys
 {
     public const string ContentType = nameof(ContentType);
+    public const string FileName = nameof(FileName);
 }
 

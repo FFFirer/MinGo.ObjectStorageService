@@ -7,7 +7,7 @@ namespace Mingo.ObjectStorageService.EntityFrameworkCore;
 
 public class BucketStore : StoreBase, IBucketStore
 {
-    private AppDbContext _db => this.AppDB;
+    private AppDbContext _db => this.Db;
     public BucketStore(AppDbContext db) : base(db)
     {
     }

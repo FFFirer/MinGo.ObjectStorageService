@@ -23,4 +23,6 @@ public interface IStorageProvider
     Task DeleteAsync(string bucket, string id, CancellationToken cancellationToken);
     Task<IObjectStorageInfo?> GetObjectAsync(string bucket, string id, CancellationToken cancellationToken);
     Task SaveAsync(Stream stream, ObjectInfo objectInfo, CancellationToken cancellationToken);
+
+    Stream OpenWriteStream(ObjectInfo objectInfo, CancellationToken cancellationToken);
 }
