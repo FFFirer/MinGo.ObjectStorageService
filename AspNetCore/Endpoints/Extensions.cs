@@ -38,6 +38,7 @@ public static class HttpExtensions
     }
 }
 
+[Obsolete]
 public class RequestSizeLimitMiddleware
 {
     private readonly RequestDelegate _next;

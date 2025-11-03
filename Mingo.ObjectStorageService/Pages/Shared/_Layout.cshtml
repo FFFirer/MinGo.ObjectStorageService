@@ -1,0 +1,38 @@
+﻿@inject IWebHostEnvironment env
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - MingoOSS</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/Mingo.ObjectStorageService.styles.css" asp-append-version="true" />
+</head>
+
+<body>
+    <header>
+        @if (env.IsDevelopment())
+        {
+            <a href="/swagger" target="_blank">Swagger</a>
+        }
+    </header>
+
+    <div>
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer>
+        <div>
+            &copy; 2025 - MingoOSS - <a asp-area="" asp-page="/Privacy">Privacy</a>
+        </div>
+    </footer>
+
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>

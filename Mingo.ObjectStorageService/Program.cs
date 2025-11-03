@@ -35,6 +35,10 @@ builder.Services
 .AddEndpointsApiExplorer()
 .AddHealthChecks();
 
+// Razor Pages
+builder.Services
+.AddRazorPages();
+
 builder.Services
 .AddOpenApiDocument(doc =>
 {
@@ -58,9 +62,18 @@ if (app.Environment.IsDevelopment())
     app.Migrate();
     app.UseOpenApi();
     app.UseSwaggerUi();
+
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
 }
 
-app.UseMiddleware<RequestSizeLimitMiddleware>();
+app.UseRouting();
+
+// app.UseAuthorization();
+
+app.MapStaticAssets();
+app.MapRazorPages().WithStaticAssets();
+
 app.MapGroup("oss").MapObjectServiceEndpoints();
 
 app.Run();
