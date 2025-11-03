@@ -6,10 +6,10 @@ namespace Mingo.ObjectStorageService.Core.Stores;
 
 public interface IBucketQuery
 {
-    
+    IQueryable<BucketEntity> All { get; }
 }
 
-public interface IBucketStore : IStoreBase
+public interface IBucketStore : IStoreBase, IBucketQuery
 {
     Task AddAsync(BucketEntity bucket, CancellationToken cancellationToken);
     Task DeleteAsync(string bucket, CancellationToken cancellationToken);

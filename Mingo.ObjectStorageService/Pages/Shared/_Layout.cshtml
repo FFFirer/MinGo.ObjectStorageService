@@ -7,8 +7,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewData["Title"] - MingoOSS</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/Mingo.ObjectStorageService.styles.css" asp-append-version="true" />
+    @* <script type="importmap"></script> *@
+    @* <link rel="stylesheet" href="~/Mingo.ObjectStorageService.styles.css" asp-append-version="true" /> *@
+    <link rel="stylesheet" vite-href="~/dist/tailwind.config.css" />
 </head>
 
 <body>
@@ -31,7 +32,7 @@
         </div>
     </footer>
 
-
+    <script type="module" vite-src="~/dist/Assets/app.ts"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 

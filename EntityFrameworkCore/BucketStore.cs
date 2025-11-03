@@ -1,5 +1,7 @@
 using System;
 
+using Microsoft.EntityFrameworkCore;
+
 using Mingo.ObjectStorageService.Core.Entities;
 using Mingo.ObjectStorageService.Core.Stores;
 
@@ -8,6 +10,9 @@ namespace Mingo.ObjectStorageService.EntityFrameworkCore;
 public class BucketStore : StoreBase, IBucketStore
 {
     private AppDbContext _db => this.Db;
+
+    public IQueryable<BucketEntity> All => _db.Buckets;
+
     public BucketStore(AppDbContext db) : base(db)
     {
     }
@@ -29,4 +34,6 @@ public class BucketStore : StoreBase, IBucketStore
     {
         return await _db.Buckets.FindAsync([bucket], cancellationToken);
     }
+
+
 }

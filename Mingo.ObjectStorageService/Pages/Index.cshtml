@@ -1,10 +1,52 @@
-﻿@page
+﻿@page "/"
+@using Mingo.ObjectStorageService.Core
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Bucket List";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div>
+    <button type="submit" class="oss-btn oss-btn-primary">查询</button>
+</div>
+
+<table class="oss-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Created Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Buckets.IsNullOrEmpty())
+        {
+            <tr>
+                <td colspan="2">
+                    No Data</td>
+            </tr>
+        }
+        else
+        {
+            foreach (var b in Model.Buckets)
+            {
+                <tr>
+                    <td>
+                        @b.Id
+                    </td>
+                    <td>
+                        @b.CreatedTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<div class="oss-join">
+    <a disabled=@(!Model.Buckets.HasPreviousPage) asp-route-page="@(Model.Buckets.PageIndex - 1)"
+        class="oss-join-item oss-btn @Model.Buckets.HasPreviousPage ? @("") : @("disabled")"> @("<<") </a>
+
+    <a class="oss-join-item oss-btn">@Model.Buckets.PageIndex</a>
+
+    <a disabled=@(!Model.Buckets.HasNextPage) asp-route-currentPage=@(Model.Buckets.PageIndex + 1)
+        class=" oss-join-item oss-btn @Model.Buckets.HasNextPage ? @("") : @("disabled") "> @(">>")
+    </a>
 </div>

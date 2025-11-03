@@ -12,6 +12,8 @@ using Mingo.ObjectStorageService.NSwag;
 
 using Serilog;
 
+using Vite.AspNetCore;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
 {
@@ -39,6 +41,10 @@ builder.Services
 builder.Services
 .AddRazorPages();
 
+// Vite Services
+builder.Services
+.AddViteServices(v => { v.Server.AutoRun = true; });
+
 builder.Services
 .AddOpenApiDocument(doc =>
 {
@@ -59,6 +65,9 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
+    app.UseWebSockets();
+    app.UseViteDevelopmentServer(true);
+
     app.Migrate();
     app.UseOpenApi();
     app.UseSwaggerUi();
