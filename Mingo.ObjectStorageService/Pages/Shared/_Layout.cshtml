@@ -14,10 +14,21 @@
 
 <body>
     <header>
-        @if (env.IsDevelopment())
-        {
-            <a href="/swagger" target="_blank">Swagger</a>
-        }
+        <div class="oss-navbar bg-base-100 shadow-sm">
+            <div class="flex-1">
+                <a class="oss-btn oss-btn-ghost text-xl" asp-page="/">MingoOSS</a>
+            </div>
+            <div class="flex-none">
+                <ul class="oss-menu oss-menu-horizontal px-1">
+                    <li>
+                        @if (env.IsDevelopment())
+                        {
+                            <a href="/swagger" class="oss-btn oss-btn-secondary" target="_blank">Swagger</a>
+                        }
+                    </li>
+                </ul>
+            </div>
+        </div>
     </header>
 
     <div>

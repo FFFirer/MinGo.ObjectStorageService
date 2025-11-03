@@ -42,11 +42,11 @@
 
 <div class="oss-join">
     <a disabled=@(!Model.Buckets.HasPreviousPage) asp-route-page="@(Model.Buckets.PageIndex - 1)"
-        class="oss-join-item oss-btn @Model.Buckets.HasPreviousPage ? @("") : @("disabled")"> @("<<") </a>
+        class="oss-join-item oss-btn @Model.Buckets.HasPreviousPage ? @("") : @("disabled")"> @("上一页") </a>
 
     <a class="oss-join-item oss-btn">@Model.Buckets.PageIndex</a>
 
     <a disabled=@(!Model.Buckets.HasNextPage) asp-route-currentPage=@(Model.Buckets.PageIndex + 1)
-        class=" oss-join-item oss-btn @Model.Buckets.HasNextPage ? @("") : @("disabled") "> @(">>")
+        class=" oss-join-item oss-btn @Model.Buckets.HasNextPage ? @("") : @("disabled") "> @("下一页")
     </a>
 </div>
