@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +15,9 @@ using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.Limits.MaxRequestBodySize = null;
+    // 注释此行，会影响IFormFile绑定，未匹配到Endpoint就会抛出异常
+    // 调用DisableRequestSizeLimit, 效果如下
+    // options.Limits.MaxRequestBodySize = null;
 });
 
 Log.Logger = new LoggerConfiguration()
@@ -45,7 +48,8 @@ builder.Services
 .AddObjectStorageCore()
 .AddFileSystemStorageProvider()
 .AddSqliteDbContext<AppDbContext>(builder.Configuration)
-.AddObjectStorageStores();
+.AddObjectStorageStores()
+.Configure<AppOptions>(builder.Configuration.GetSection(AppOptions.ConfiguPath));
 
 var app = builder.Build();
 

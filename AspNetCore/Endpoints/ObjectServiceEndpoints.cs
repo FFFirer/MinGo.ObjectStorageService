@@ -22,12 +22,17 @@ public static class ObjectServiceEndpointExtensions
 
         endpoints.MapPut("{bucket}/{*id}", UploadObject)
             .Accepts<Stream>("application/octet-stream")
-            .DisableRequestSizeLimit()
+            .DisableRequestSizeLimit()  // disable Kestrel MaxRequestSizeLimit
             .DisableAntiforgery();
 
         endpoints.MapPost("{bucket}/{*id}", UploadObjectForm)
             .Accepts<IFormFile>("multipart/form-data")
             .DisableRequestSizeLimit()
+            .RequestFormLimits(options =>
+            {
+                // options.BufferBodyLengthLimit = 500.MiB();
+                options.MultipartBodyLengthLimit = 500.MiB();
+            })
             .DisableAntiforgery();
 
         endpoints.MapGet("{bucket}/{*id}", DownloadObject);
@@ -62,8 +67,9 @@ public static class ObjectServiceEndpointExtensions
         var metadata = request.Headers.ResolveUploadObjectMetadata();
         var filename = metadata.GetValueOrDefault(ObjectMetadataKeys.FileName, string.Empty);
         var contentType = metadata.GetValueOrDefault(ObjectMetadataKeys.ContentType, string.Empty);
+        var size = request.ContentLength ?? 0;
 
-        UploadObjectInfo uploadInfo = new(bucket, id, filename, contentType, 0, metadata);
+        UploadObjectInfo uploadInfo = new(bucket, id, filename, contentType, size, metadata);
         await service.SaveObjectAsync(file, uploadInfo, cancellationToken);
         return TypedResults.Ok();
     }

@@ -28,5 +28,12 @@ public static class ObjectMetadataKeys
 {
     public const string ContentType = nameof(ContentType);
     public const string FileName = nameof(FileName);
+    public const string Size = nameof(Size);
+
+    public static Dictionary<string, string> NormalizeObjectMetadata(this IDictionary<string, string>? dict)
+    {
+        if (dict is null) { return new([], StringComparer.OrdinalIgnoreCase); }
+        return dict.ToDictionary(StringComparer.OrdinalIgnoreCase);
+    }
 }
 

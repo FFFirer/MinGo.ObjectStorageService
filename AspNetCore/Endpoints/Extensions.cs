@@ -11,9 +11,18 @@ namespace Mingo.ObjectStorageService.AspNetCore.Endpoints;
 public static class MiniApiExtensions
 {
     private readonly static DisableRequestSizeLimitAttribute _disableRequetSizeLimitAttribute = new DisableRequestSizeLimitAttribute();
+
     public static IEndpointConventionBuilder DisableRequestSizeLimit(this IEndpointConventionBuilder endpoint)
     {
         endpoint.Add(b => b.Metadata.Add(_disableRequetSizeLimitAttribute));
+        return endpoint;
+    }
+
+    public static IEndpointConventionBuilder RequestFormLimits(this IEndpointConventionBuilder endpoint, Action<RequestFormLimitsAttribute> configure)
+    {
+        var attribute = new RequestFormLimitsAttribute();
+        configure.Invoke(attribute);
+        endpoint.Add(b => b.Metadata.Add(attribute));
         return endpoint;
     }
 }
@@ -41,20 +50,21 @@ public class RequestSizeLimitMiddleware
     public async Task Invoke(HttpContext httpContext)
     {
         var endpoint = httpContext.GetEndpoint();
+        var formFreature = httpContext.Features.Get<IFormFeature>();
         var feature = httpContext.Features.Get<IHttpMaxRequestBodySizeFeature>();
         if (feature is not null)
         {
             if (endpoint is not null)
             {
                 var requestSizeLimit = endpoint.Metadata.Where(x => x is IRequestSizeLimitMetadata).FirstOrDefault();
-                if (requestSizeLimit is not null)
-                {
-                    feature.MaxRequestBodySize = ((IRequestSizeLimitMetadata)requestSizeLimit).MaxRequestBodySize;
-                }
-                else
-                {
-                    feature.MaxRequestBodySize = 30_000_000;
-                }
+                // if (requestSizeLimit is not null)
+                // {
+                //     feature.MaxRequestBodySize = ((IRequestSizeLimitMetadata)requestSizeLimit).MaxRequestBodySize;
+                // }
+                // else
+                // {
+                //     feature.MaxRequestBodySize = 30_000_000;
+                // }
             }
         }
 

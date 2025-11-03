@@ -110,7 +110,8 @@ public class DefaultObjectStorageService : IObjectStorageService
             throw new InvalidOperationException($"Bucket '{uploadInfo.Bucket}' not exists");
         }
 
-        var metadata = new Dictionary<string, string>(uploadInfo.Metadata ?? new Dictionary<string, string>());
+        var metadata = uploadInfo.Metadata.NormalizeObjectMetadata();
+        metadata[ObjectMetadataKeys.Size] = uploadInfo.Size.ToString();
 
         var objectEntity = await _objectStore.GetAsync(uploadInfo.Bucket, uploadInfo.Id, cancellationToken);
         if (objectEntity is null)
@@ -123,6 +124,7 @@ public class DefaultObjectStorageService : IObjectStorageService
             await _objectStore.AddAsync(objectEntity, cancellationToken);
         }
 
+        objectEntity.LastModified = DateTimeOffset.UtcNow;
         objectEntity.Metadata = metadata;
         await _objectStore.SaveChangesAsync(cancellationToken);
 
