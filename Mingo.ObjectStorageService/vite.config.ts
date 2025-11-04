@@ -1,5 +1,6 @@
 import { defineConfig } from "vite"
 import tailwindcss from '@tailwindcss/vite';
+import solid from "vite-plugin-solid";
 
 export default defineConfig({
     appType: 'custom',
@@ -10,10 +11,11 @@ export default defineConfig({
         emptyOutDir: true,
         outDir: "wwwroot/dist",
         rollupOptions: {
-            input: ["Assets/app.ts", "tailwind.config.css"]
+            input: ["Assets/app.tsx"]
         }
     },
     plugins: [
-        tailwindcss()
+        tailwindcss(),
+        solid()
     ]
 })

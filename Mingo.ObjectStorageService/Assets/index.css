@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@source "./**/*.{ts,tsx}";
+@source "../Pages/**/*.{cshtml,razor}";
+
+@plugin "daisyui" {
+    prefix: "oss-";
+}
