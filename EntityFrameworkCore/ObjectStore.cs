@@ -29,4 +29,6 @@ public class ObjectStore : StoreBase, IObjectStore
     {
         return await _db.Objects.FindAsync([bucket, id], cancellationToken);
     }
+
+    public IQueryable<ObjectEntity> All => _db.Set<ObjectEntity>();
 }

@@ -16,7 +16,7 @@
     <header>
         <div class="oss-navbar bg-base-100 shadow-sm">
             <div class="flex-1">
-                <a class="oss-btn oss-btn-ghost text-xl" asp-page="/">MingoOSS</a>
+                <a class="oss-btn oss-btn-ghost text-xl" asp-page="/Index">MingoOSS</a>
             </div>
             <div class="flex-none">
                 <ul class="oss-menu oss-menu-horizontal px-1">
@@ -31,14 +31,14 @@
         </div>
     </header>
 
-    <div>
+    <div class="px-2">
         <main role="main">
             @RenderBody()
         </main>
     </div>
 
     <footer>
-        <div>
+        <div class="text-center">
             &copy; 2025 - MingoOSS - <a asp-area="" asp-page="/Privacy">Privacy</a>
         </div>
     </footer>

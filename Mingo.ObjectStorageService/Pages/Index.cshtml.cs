@@ -17,7 +17,7 @@ namespace Mingo.ObjectStorageService.Pages
             _bucketStore = bucketStore;
         }
 
-        public PaginatedList<BucketEntity> Buckets { get; set; } = new PaginatedList<BucketEntity>([], 0, 1, 20);
+        public PaginatedList<BucketEntity>? Buckets { get; set; } 
 
         [BindProperty(SupportsGet = true)]
         public int CurrentPage { get; set; } = 1;

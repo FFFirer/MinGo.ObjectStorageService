@@ -83,6 +83,7 @@ app.UseRouting();
 app.MapStaticAssets();
 app.MapRazorPages().WithStaticAssets();
 
+app.MapAdminEndpoints();
 app.MapGroup("oss").MapObjectServiceEndpoints();
 
 app.Run();

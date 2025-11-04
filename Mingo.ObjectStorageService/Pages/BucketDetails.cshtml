@@ -1,0 +1,65 @@
+﻿@page "/{bucket}"
+@using Mingo.ObjectStorageService.Core
+@using Mingo.ObjectStorageService.Core.Entities
+@model Mingo.ObjectStorageService.Pages.BucketDetailsModel
+@{
+    ViewData["Title"] = Model.Bucket;
+}
+
+@if (Model.ObjectEntities is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div>
+        <a class="oss-btn oss-btn-primary" asp-page="/Upload" asp-route-bucket="@Model.Bucket">Upload</a>
+    </div>
+
+    <table class="oss-table">
+        <thead>
+            <tr>
+                <td>Id</td>
+                <td>FileName</td>
+                <td>Last Modeified</td>
+                <td></td>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.ObjectEntities.IsNullOrEmpty())
+            {
+                <tr>
+                    <td colspan="4">No Data.</td>
+                </tr>
+            }
+            else
+            {
+                foreach (var objectEntity in Model.ObjectEntities)
+                {
+                    <tr>
+                        <td>@objectEntity.Id</td>
+                        <td>@(objectEntity.Metadata.TryGetValue(ObjectMetadataKeys.FileName, out var filename) ? filename :
+                                            string.Empty)</td>
+                        <td>@objectEntity.LastModified.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                        <td>
+                            <a href="@(Endpoints.BuildObjectDownloadUrl(Model.Bucket, objectEntity.Id))" target="_blank">下载</a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    <div class="text-center">
+        <div class="oss-join">
+            <a disabled=@(!Model.ObjectEntities.HasPreviousPage) asp-route-page="@(Model.ObjectEntities.PageIndex - 1)"
+                class="oss-join-item oss-btn @Model.ObjectEntities.HasPreviousPage ? @("") : @("disabled")"> @("上一页") </a>
+
+            <a class="oss-join-item oss-btn">@Model.ObjectEntities.PageIndex</a>
+
+            <a disabled=@(!Model.ObjectEntities.HasNextPage) asp-route-currentPage=@(Model.ObjectEntities.PageIndex + 1)
+                class=" oss-join-item oss-btn @Model.ObjectEntities.HasNextPage ? @("") : @("disabled") "> @("下一页")
+            </a>
+        </div>
+    </div>
+}

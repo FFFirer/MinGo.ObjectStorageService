@@ -6,7 +6,7 @@ namespace Mingo.ObjectStorageService.Core.Stores;
 
 public interface IObjectQuery
 {
-    
+    IQueryable<ObjectEntity> All { get; }
 }
 
 public interface IObjectStore : IObjectQuery, IStoreBase
