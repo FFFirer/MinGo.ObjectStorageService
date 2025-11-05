@@ -11,7 +11,7 @@ export default defineConfig({
         emptyOutDir: true,
         outDir: "wwwroot/dist",
         rollupOptions: {
-            input: ["Assets/app.tsx"]
+            input: ["tailwind.config.css"]
         }
     },
     plugins: [

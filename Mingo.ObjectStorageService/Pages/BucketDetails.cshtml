@@ -12,15 +12,15 @@
 }
 else
 {
-    <div>
+    <div class="flex w-ful justify-between">
+        <a class="oss-btn" href="/">Back</a>
         <a class="oss-btn oss-btn-primary" asp-page="/Upload" asp-route-bucket="@Model.Bucket">Upload</a>
     </div>
 
     <table class="oss-table">
         <thead>
             <tr>
-                <td>Id</td>
-                <td>FileName</td>
+                <td>Name</td>
                 <td>Last Modeified</td>
                 <td></td>
             </tr>
@@ -29,7 +29,7 @@ else
             @if (Model.ObjectEntities.IsNullOrEmpty())
             {
                 <tr>
-                    <td colspan="4">No Data.</td>
+                    <td colspan="3">No Data.</td>
                 </tr>
             }
             else
@@ -37,12 +37,14 @@ else
                 foreach (var objectEntity in Model.ObjectEntities)
                 {
                     <tr>
-                        <td>@objectEntity.Id</td>
                         <td>@(objectEntity.Metadata.TryGetValue(ObjectMetadataKeys.FileName, out var filename) ? filename :
                                             string.Empty)</td>
                         <td>@objectEntity.LastModified.ToString("yyyy-MM-dd HH:mm:ss")</td>
                         <td>
-                            <a href="@(Endpoints.BuildObjectDownloadUrl(Model.Bucket, objectEntity.Id))" target="_blank">下载</a>
+                            <a class="oss-btn" href="@(Endpoints.BuildObjectDownloadUrl(Model.Bucket, objectEntity.Id))"
+                                target="_blank">下载</a>
+                            <button type="button" class="oss-btn oss-btn-warning"
+                                onclick="deleteObject('@(objectEntity.Id)')">删除</button>
                         </td>
                     </tr>
                 }
@@ -50,7 +52,7 @@ else
         </tbody>
     </table>
 
-    <div class="text-center">
+    <div>
         <div class="oss-join">
             <a disabled=@(!Model.ObjectEntities.HasPreviousPage) asp-route-page="@(Model.ObjectEntities.PageIndex - 1)"
                 class="oss-join-item oss-btn @Model.ObjectEntities.HasPreviousPage ? @("") : @("disabled")"> @("上一页") </a>
@@ -62,4 +64,54 @@ else
             </a>
         </div>
     </div>
+}
+
+@section Scripts {
+    <script type="text/javascript">
+        const __BUCKET__ = '@Model.Bucket';
+
+        const callDeleteApi = async (id) => {
+
+            const url = `/oss/${__BUCKET__}/${id}`;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'DELETE',
+                })
+
+                if (!response.ok) {
+                    throw new Error(`删除失败: ${response.status} ${response.statusText}`);
+                }
+
+                return {
+                    success: true,
+                    message: "删除成功",
+                    url: url,
+                    status: response.status,
+                };
+            }
+            catch (error) {
+                return {
+                    success: false,
+                    message: error instanceof Error ? error.message : "删除失败",
+                    status:
+                        error instanceof Error && error.message === "AbortError" ? 400 : 500,
+                };
+            }
+        }
+
+        const deleteObject = (id) => {
+
+            callDeleteApi(id).then(result => {
+                alert(result.message);
+
+                if (result.success) {
+                    location.reload(true);
+                }
+            }).finally(() => {
+
+            })
+        }
+
+    </script>
 }

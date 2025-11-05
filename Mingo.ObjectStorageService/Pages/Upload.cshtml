@@ -1,11 +1,110 @@
 ﻿@page "/{bucket}/upload"
+@using Vite.AspNetCore
+@inject IViteManifest m;
+
 @model Mingo.ObjectStorageService.Pages.UploadModel
 @{
     ViewData["Title"] = "Upload";
-}hh
+}
 
-<button class="oss-btn oss-btn-primary" type="button" onclick="h()">Click</button>
+<div>
 
-<script type="module">
+    <input type="file" class="oss-file-input" multiple="false" name="file" id="uploadFile" />
+    <input type="text" class="oss-input" placeholder='文件名称' name="id" id="uploadId" />
+</div>
+<div class="mt-1">
+    <button id="btnUpload" class="oss-btn oss-btn-primary" type="button" onclick="upload()">Upload</button>
+    <a class="oss-btn" asp-page="/BucketDetails" asp-route-bucket="@Model.Bucket">Back</a>
+</div>
 
-</script>
+@section Scripts {
+    <script>
+        const __BUCKET__ = '@Model.Bucket';
+        function uuidv4() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                const r = Math.random() * 16 | 0,
+                    v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+        const uploadFile = async (file, id) => {
+            try {
+                if ((id?.trim() ?? '') === '') {
+                    id = encodeURIComponent(file.name);
+                }
+
+                const path = `/oss/${__BUCKET__}/${id}`
+                const body = file;
+
+                const headers = {
+                    "Content-Type": "application/octet-stream",
+                    "MINGO-OSS-ContentType": file.type,
+                    "MINGO-OSS-FileName": file.name,
+                    "MINGO-OSS-Size": file.size.toString(),
+                };
+
+                const response = await fetch(path, {
+                    method: "PUT",
+                    headers,
+                    body,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`上传失败: ${response.status} ${response.statusText}`);
+                }
+
+                return {
+                    success: true,
+                    message: "文件上传成功",
+                    url: path,
+                    status: response.status,
+                };
+            } catch (error) {
+                return {
+                    success: false,
+                    message: error instanceof Error ? error.message : "文件上传失败",
+                    status:
+                        error instanceof Error && error.message === "AbortError" ? 400 : 500,
+                };
+            }
+        };
+
+        const disableA = () => {
+            const btn = document.getElementById('btnUpload');
+            btn.classList.add('disabled');
+            btn.setAttribute('disabled', 'disabled');
+        }
+
+        const enableA = () => {
+            const btn = document.getElementById('btnUpload');
+            btn.classList.remove('disabled');
+            btn.setAttribute('disabled', '');
+        }
+
+        const upload = () => {
+            if (document.getElementById("uploadFile").files.length <= 0) {
+                alert("请选择要上传的文件！");
+            }
+
+            const files = document.getElementById("uploadFile").files;
+            if (files.length <= 0) {
+                alert("请选择要上传的文件");
+                return;
+            }
+            const file = files[0];
+
+            const id = document.getElementById("uploadId").value;
+
+            disableA();
+            uploadFile(file, id)
+                .then(result => {
+                    alert(result.message);
+                    if (result.success) {
+                        document.getElementById('file').files = [];
+                        document.getElementById("id").value = '';
+                    }
+                    enableA();
+                })
+        }
+    </script>
+}

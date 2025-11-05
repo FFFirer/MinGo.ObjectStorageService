@@ -43,7 +43,10 @@ builder.Services
 
 // Vite Services
 builder.Services
-.AddViteServices(v => { v.Server.AutoRun = true; });
+.AddViteServices(v =>
+{
+    v.Server.AutoRun = true;
+});
 
 builder.Services
 .AddOpenApiDocument(doc =>

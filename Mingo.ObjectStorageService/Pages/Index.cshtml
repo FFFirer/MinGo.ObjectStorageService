@@ -43,7 +43,7 @@ else
         </tbody>
     </table>
 
-    <div class="text-center">
+    <div>
         <div class="oss-join">
             <a disabled=@(!Model.Buckets.HasPreviousPage) asp-route-page="@(Model.Buckets.PageIndex - 1)"
                 class="oss-join-item oss-btn @Model.Buckets.HasPreviousPage ? @("") : @("disabled")"> @("上一页") </a>
