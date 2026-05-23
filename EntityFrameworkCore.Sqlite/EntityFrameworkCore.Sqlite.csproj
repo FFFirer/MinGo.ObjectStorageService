@@ -22,4 +22,9 @@
     <AssemblyName>Mingo.ObjectStorageService.EntityFrameworkCore.Sqlite</AssemblyName>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>Mingo.ObjectStorageService.EntityFrameworkCore.Sqlite</PackageId>
+  </PropertyGroup>
+
 </Project>

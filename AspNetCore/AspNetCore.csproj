@@ -10,6 +10,11 @@
     <RootNamespace>Mingo.ObjectStorageService.AspNetCore</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>Mingo.ObjectStorageService.AspNetCore</PackageId>
+  </PropertyGroup>
+
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
 

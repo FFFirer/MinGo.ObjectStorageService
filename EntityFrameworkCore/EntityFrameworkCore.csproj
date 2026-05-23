@@ -13,9 +13,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
-    
+
     <RootNamespace>Mingo.ObjectStorageService.EntityFrameworkCore</RootNamespace>
-    <RootNamespace>Mingo.ObjectStorageService.EntityFrameworkCore</RootNamespace>
+    <AssemblyName>Mingo.ObjectStorageService.EntityFrameworkCore</AssemblyName>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>Mingo.ObjectStorageService.EntityFrameworkCore</PackageId>
+  </PropertyGroup>
 </Project>
