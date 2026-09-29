@@ -128,23 +128,42 @@ public class FileSystemStorageProvider : IStorageProvider
 
     public async Task SaveAsync(Stream stream, ObjectInfo objectInfo, CancellationToken cancellationToken)
     {
-        using var fs = OpenWriteStream(objectInfo);
-        await stream.CopyToAsync(fs);
+        var finalPath = ResolveObjectPhysicalPath(objectInfo.Bucket, objectInfo.Id);
+        var tempPath = finalPath + ".tmp";
+
+        using (var fs = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None))
+        {
+            await stream.CopyToAsync(fs, cancellationToken);
+        }
+
+        File.Move(tempPath, finalPath, overwrite: true);
     }
 
     private Stream OpenWriteStream(ObjectInfo objectInfo)
     {
         var path = ResolveObjectPhysicalPath(objectInfo.Bucket, objectInfo.Id);
-        if (File.Exists(path))
-        {
-            File.Delete(path);
-        }
+        var tempPath = path + ".tmp";
 
-        return new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Write);
+        return new AtomicWriteStream(tempPath, path);
     }
 
     public Stream OpenWriteStream(ObjectInfo objectInfo, CancellationToken cancellationToken)
     {
         return OpenWriteStream(objectInfo);
+    }
+
+    private sealed class AtomicWriteStream(string tempPath, string finalPath) : FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None)
+    {
+        private bool _committed;
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (!_committed && disposing)
+            {
+                File.Move(tempPath, finalPath, overwrite: true);
+                _committed = true;
+            }
+        }
     }
 }

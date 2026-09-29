@@ -1,5 +1,6 @@
 using System;
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +18,6 @@ public static class Endpoints
         return endpoint.MapGet("/download/{bucket}/{*id}", DownloadObject);
     }
 
-    public static Task<Results<IResult, NotFound, InternalServerError>> DownloadObject([FromRoute] string bucket, [FromRoute] string id, [FromServices] IObjectStorageService service, CancellationToken cancellationToken)
-        => ObjectServiceEndpointExtensions.DownloadObject(bucket, id, service, cancellationToken);
+    public static Task<Results<IResult, NotFound, InternalServerError>> DownloadObject([FromRoute] string bucket, [FromRoute] string id, HttpResponse response, [FromServices] IObjectStorageService service, CancellationToken cancellationToken)
+        => ObjectServiceEndpointExtensions.DownloadObject(bucket, id, response, service, cancellationToken);
 }

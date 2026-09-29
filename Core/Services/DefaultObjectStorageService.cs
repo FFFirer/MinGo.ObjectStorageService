@@ -2,6 +2,7 @@ using System;
 
 using Microsoft.Extensions.Logging;
 
+using Mingo.ObjectStorageService.Core.Common;
 using Mingo.ObjectStorageService.Core.Entities;
 using Mingo.ObjectStorageService.Core.Stores;
 
@@ -11,9 +12,12 @@ public interface IObjectStorageService
 {
     Task CreateBucketAsync(string name, CancellationToken cancellationToken);
     Task DeleteBucketAsync(string name, CancellationToken cancellationToken);
+    Task<PageResult<BucketSummary>> ListBucketsAsync(int pageIndex, int pageSize, CancellationToken cancellationToken);
 
     Task DeleteObjectAsync(ObjectInfo objectInfo, CancellationToken cancellationToken);
     Task<IDownloadResponse?> GetObjectDownloadAsync(ObjectInfo objectInfo, CancellationToken cancellationToken);
+    Task<ObjectMetadataResult?> GetObjectMetadataAsync(ObjectInfo objectInfo, CancellationToken cancellationToken);
+    Task<PageResult<ObjectSummary>> ListObjectsAsync(string bucket, int pageIndex, int pageSize, string? prefix, CancellationToken cancellationToken);
     Task SaveObjectAsync(Stream stream, UploadObjectInfo uploadInfo, CancellationToken cancellationToken);
 
     Task<Stream> OpenObjectSaveStreamAsync(UploadObjectInfo uploadInfo, CancellationToken cancellationToken);
@@ -63,6 +67,13 @@ public class DefaultObjectStorageService : IObjectStorageService
         await _bucketStore.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task<PageResult<BucketSummary>> ListBucketsAsync(int pageIndex, int pageSize, CancellationToken cancellationToken)
+    {
+        var page = await _bucketStore.GetPagedListAsync(pageIndex, pageSize, cancellationToken);
+        var items = page.Datas.Select(b => new BucketSummary(b.Id, b.Guid, b.CreatedTime)).ToList();
+        return new PageResult<BucketSummary>(items, page.TotalCount);
+    }
+
     public async Task DeleteObjectAsync(ObjectInfo objectInfo, CancellationToken cancellationToken)
     {
         await _objectStore.DeleteAsync(objectInfo.Bucket, objectInfo.Id, cancellationToken);
@@ -83,9 +94,24 @@ public class DefaultObjectStorageService : IObjectStorageService
         return storageInfo switch
         {
             null => null,
-            FileSystemStorageInfo fs => new DownloadFromPathResponse(fs.FullPath, true, objectEntity.FileName, objectEntity.Metadata.GetValueOrDefault(ObjectMetadataKeys.ContentType), objectEntity.LastModified),
+            FileSystemStorageInfo fs => new DownloadFromPathResponse(fs.FullPath, true, objectEntity.FileName, objectEntity.Metadata.GetValueOrDefault(ObjectMetadataKeys.ContentType), objectEntity.LastModified, objectEntity.Metadata),
             _ => throw new NotSupportedException()
         };
+    }
+
+    public async Task<ObjectMetadataResult?> GetObjectMetadataAsync(ObjectInfo objectInfo, CancellationToken cancellationToken)
+    {
+        var objectEntity = await _objectStore.GetAsync(objectInfo.Bucket, objectInfo.Id, cancellationToken);
+        if (objectEntity is null) { return null; }
+
+        return new ObjectMetadataResult(objectEntity.Id, objectEntity.BucketName, objectEntity.FileName, objectEntity.CreatedTime, objectEntity.LastModified, objectEntity.Metadata);
+    }
+
+    public async Task<PageResult<ObjectSummary>> ListObjectsAsync(string bucket, int pageIndex, int pageSize, string? prefix, CancellationToken cancellationToken)
+    {
+        var page = await _objectStore.GetPagedListAsync(bucket, pageIndex, pageSize, prefix, cancellationToken);
+        var items = page.Datas.Select(o => new ObjectSummary(o.Id, o.BucketName, o.FileName, o.CreatedTime, o.LastModified, o.Metadata)).ToList();
+        return new PageResult<ObjectSummary>(items, page.TotalCount);
     }
 
     public async Task<Stream> OpenObjectSaveStreamAsync(UploadObjectInfo uploadInfo, CancellationToken cancellationToken)
@@ -137,10 +163,16 @@ public interface IDownloadResponse
 {
     string FileName { get; }
     DateTimeOffset? LastModified { get; }
+    IDictionary<string, string> Metadata { get; }
 }
 
 public record ObjectInfo(string Bucket, string Id);
-public record DownloadFromPathResponse(string Path, bool IsPhysicalPath, string FileName, string? ContentType, DateTimeOffset? LastModified) : IDownloadResponse;
-public record DownloadFromStreamResponse(Stream Stream, string FileName, string? ContentType, DateTimeOffset? LastModified) : IDownloadResponse;
+public record DownloadFromPathResponse(string Path, bool IsPhysicalPath, string FileName, string? ContentType, DateTimeOffset? LastModified, IDictionary<string, string> Metadata) : IDownloadResponse;
+public record DownloadFromStreamResponse(Stream Stream, string FileName, string? ContentType, DateTimeOffset? LastModified, IDictionary<string, string> Metadata) : IDownloadResponse;
+
+public record ObjectMetadataResult(string Id, string BucketName, string FileName, DateTimeOffset CreatedTime, DateTimeOffset LastModified, IDictionary<string, string> Metadata);
+
+public record BucketSummary(string Id, Guid Guid, DateTimeOffset CreatedTime);
+public record ObjectSummary(string Id, string BucketName, string FileName, DateTimeOffset CreatedTime, DateTimeOffset LastModified, IDictionary<string, string> Metadata);
 
 public record UploadObjectInfo(string Bucket, string Id, string FileName, string ContentType, long Size, IDictionary<string, string>? Metadata = null);

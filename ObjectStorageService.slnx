@@ -4,4 +4,5 @@
   <Project Path="EntityFrameworkCore.Sqlite/EntityFrameworkCore.Sqlite.csproj" />
   <Project Path="EntityFrameworkCore/EntityFrameworkCore.csproj" />
   <Project Path="Mingo.ObjectStorageService/Mingo.ObjectStorageService.csproj" />
+  <Project Path="Sdk/Sdk.csproj" />
 </Solution>

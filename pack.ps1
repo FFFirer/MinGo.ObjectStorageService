@@ -8,6 +8,7 @@ $projects = @{
     "Core" = "./Core/Core.csproj";
     "EntityFrameworkCore" = "./EntityFrameworkCore/EntityFrameworkCore.csproj";
     "EntityFrameworkCore.Sqlite" = "./EntityFrameworkCore.Sqlite/EntityFrameworkCore.Sqlite.csproj";
+    "Sdk" = "./Sdk/Sdk.csproj";
 }
 
 dotnet build -c Release 
